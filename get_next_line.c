@@ -12,10 +12,6 @@
 
 #include "get_next_line.h"
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
-#endif
-
 static char	*free_null(char *str)
 {
 	free(str);
@@ -32,13 +28,12 @@ static char	*get_buff(char *buff, int fd)
 	input = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!input)
 		return (NULL);
-	byte = 1;
-	while (byte && !ft_strchr(buff, '\n'))
+	while (!ft_strchr(buff, '\n'))
 	{
 		byte = read(fd, input, BUFFER_SIZE);
 		if (byte == -1)
 			return (free_null(input));
-		if (!byte)
+		if (byte == 0)
 			break ;
 		input[byte] = '\0';
 		tmp = ft_strjoin(buff, input);
@@ -51,28 +46,21 @@ static char	*get_buff(char *buff, int fd)
 	return (buff);
 }
 
-static char	*add_line(char *buff, char *line)
+static char	*add_line(char *buff)
 {
 	size_t	cnt;
-	char	*trim;
-	char	*tmp;
+	char	*line;
 
-	cnt = 0;
 	if (!buff)
 		return (NULL);
+	cnt = 0;
 	while (buff[cnt] && buff[cnt] != '\n')
 		cnt += 1;
 	if (buff[cnt] == '\n')
 		cnt += 1;
-	trim = ft_substr(buff, 0, cnt);
-	if (!trim)
-		return (free_null(buff));
-	tmp = ft_strjoin(line, trim);
-	free_null(line);
-	line = tmp;
-	free_null(trim);
+	line = ft_substr(buff, 0, cnt);
 	if (!line)
-		return (NULL);
+		return (free_null(buff));
 	if (!ft_strlen(line))
 		return (free_null(line));
 	return (line);
@@ -80,19 +68,21 @@ static char	*add_line(char *buff, char *line)
 
 static char	*save_buff(char *buff)
 {
-	size_t	cnt;
 	char	*tmp;
+	size_t	cnt;
+	size_t	buff_len;
 
 	cnt = 0;
 	if (!buff)
 		return (NULL);
-	if (!ft_strlen(buff))
+	buff_len = ft_strlen(buff);
+	if (!buff_len)
 		return (free_null(buff));
 	while (buff[cnt] != '\n' && buff[cnt] != '\0')
 		cnt += 1;
 	if (buff[cnt] == '\n')
 		cnt += 1;
-	tmp = ft_substr(buff, cnt, ft_strlen(buff) - cnt);
+	tmp = ft_substr(buff, cnt, buff_len - cnt);
 	free_null(buff);
 	if (!tmp)
 		return (NULL);
@@ -104,12 +94,11 @@ char	*get_next_line(int fd)
 	static char	*buff;
 	char		*line;
 
-	line = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	if (!ft_strchr(buff, '\n'))
 		buff = get_buff(buff, fd);
-	line = add_line(buff, line);
+	line = add_line(buff);
 	buff = save_buff(buff);
 	return (line);
 }

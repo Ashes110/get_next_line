@@ -92,10 +92,10 @@ char	*ft_strdup(const char *s1)
 	char	*tmp;
 	size_t	cnt;
 
-	cnt = 0;
 	tmp = (char *)malloc(sizeof(char) * (ft_strlen(s1) + 1));
 	if (!tmp)
 		return (NULL);
+	cnt = 0;
 	while (s1[cnt])
 	{
 		tmp[cnt] = s1[cnt];
